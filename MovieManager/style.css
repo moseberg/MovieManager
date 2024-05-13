@@ -1,26 +1,27 @@
-@import url('https://fonts.cdnfonts.com/css/satoshi');
+@import url("https://fonts.cdnfonts.com/css/satoshi");
 
 body {
-    font-family: 'Satoshi', sans-serif;
+  font-family: "Satoshi", sans-serif;
 }
 
 h1 {
-    text-align: center;
+  text-align: center;
 }
 
-#movie-list, #favorites-list {
-    list-style-type: none;
-    padding: 0;
+#movie-list,
+#favorites-list {
+  list-style-type: none;
+  padding: 0;
 }
 
 li {
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
 }
 
 button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
 }
