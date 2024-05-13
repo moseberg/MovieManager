@@ -8,9 +8,23 @@
     <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
   </head>
   <body>
-    <h1>Movie Details</h1>
-    <div id="movie-details"></div>
-    <button id="save-favorite">Save to Favorites</button>
+    <header>
+      <nav>
+        <h1>Movie Details</h1>
+        <div class="auth-buttons">
+          <button id="logoutButton">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div id="movie-details"></div>
+      <button id="save-favorite">Save to Favorites</button>
+    </div>
+
+    <footer>
+      <p>&copy; 2022 Movie Manager. All rights reserved.</p>
+    </footer>
     <script src="script.js"></script>
   </body>
 </html>

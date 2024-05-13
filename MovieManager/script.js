@@ -1,110 +1,130 @@
-const apiKey = "https://www.omdbapi.com/?i=tt3896198&apikey=5769c893";
-const baseApiUrl = "http://img.omdbapi.com/?apikey=[5769c893]" + apiKey;
+import fetch from 'node-fetch';
+
+const apiKey = "5769c893"; // OMDb API Key
+const baseApiUrl = `http://www.omdbapi.com/?apikey=${apiKey}`;
 const crudApiUrl = "https://crudapi.co.uk/api/v1/";
 const crudApiKey = "ayTep4yOMiyKX4U8qcDml9Doi6uqeI80-vDoR6WhZRcbpAVpyQ";
 
-// Fetcher filmer fra OMDb API
-async function fetchMovies(query) {
-  const response = await fetch(`${baseApiUrl}&s=${query}`);
-  const data = await response.json();
-  return data.Search || [];
+// Elements
+const searchForm = document.querySelector("#search-form");  
+const searchInput = document.querySelector("#search");
+const movieList = document.querySelector("#movie-list");
+const favoritesList = document.querySelector("#favorites-list");
+const movieDetails = document.querySelector("#movie-details");
+const saveFavoriteButton = document.querySelector("#save-favorite");
+
+const loginButton = document.querySelector("#loginButton");
+const logoutButton = document.querySelector("#logoutButton");
+
+let currentPage = 1;
+
+// Mock user database
+const users = [
+    { username: "user1", password: "password1" },
+    { username: "user2", password: "password2" }
+];
+
+// Authentication
+const currentUser = localStorage.getItem("currentUser");
+if (currentUser) {
+    showLogoutButton();
+} else {
+    showLoginButton();
 }
 
-// Fetcher filmer detaljer fra OMDb API
-async function fetchMovieDetails(id) {
-  const response = await fetch(`${baseApiUrl}&i=${id}`);
-  const data = await response.json();
-  return data;
-}
-
-// Lagre favoritt film til CRUD API
-async function saveFavoriteMovie(movie) {
-  await fetch(crudApiUrl + "movies", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${crudApiKey}`,
-    },
-    body: JSON.stringify(movie),
-  });
-}
-
-// Get favorite filmer from CRUD API
-async function getFavoriteMovies() {
-  const response = await fetch(crudApiUrl + "movies", {
-    headers: {
-      Authorization: `Bearer ${crudApiKey}`,
-    },
-  });
-  const data = await response.json();
-  return data;
-}
-
-// Deleter favoritt filmer fra CRUD API
-async function deleteFavoriteMovie(id) {
-  await fetch(crudApiUrl + `movies/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${crudApiKey}`,
-    },
-  });
-}
-
-// Event listeners and DOM manipulation
-document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("search");
-  const movieList = document.getElementById("movie-list");
-  const movieDetails = document.getElementById("movie-details");
-  const saveFavoriteButton = document.getElementById("save-favorite");
-  const favoritesList = document.getElementById("favorites-list");
-
-  if (searchInput) {
-    searchInput.addEventListener("input", async () => {
-      const query = searchInput.value;
-      const movies = await fetchMovies(query);
-      movieList.innerHTML = "";
-      movies.forEach((movie) => {
-        const li = document.createElement("li");
-        li.textContent = movie.Title;
-        li.addEventListener("click", () => {
-          localStorage.setItem("selectedMovieId", movie.imdbID);
-          window.location.href = "details.html";
-        });
-        movieList.appendChild(li);
-      });
-    });
-  }
-
-  if (movieDetails) {
-    const movieId = localStorage.getItem("selectedMovieId");
-    fetchMovieDetails(movieId).then((movie) => {
-      movieDetails.innerHTML = `
-                <h2>${movie.Title}</h2>
-                <p>${movie.Plot}</p>
-                <img src="${movie.Poster}" alt="${movie.Title}">
-            `;
-      saveFavoriteButton.addEventListener("click", () => {
-        saveFavoriteMovie(movie);
-        alert("Movie saved to favorites");
-      });
-    });
-  }
-
-  if (favoritesList) {
-    getFavoriteMovies().then((movies) => {
-      favoritesList.innerHTML = "";
-      movies.forEach((movie) => {
-        const li = document.createElement("li");
-        li.textContent = movie.Title;
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => {
-          deleteFavoriteMovie(movie._id);
-          li.remove();
-        });
-        li.appendChild(deleteButton);
-        favoritesList.appendChild(li);
-      });
-    });
-  }
+loginButton?.addEventListener("click", () => {
+    const username = prompt("Enter username:");
+    const password = prompt("Enter password:");
+    authenticateUser(username, password);
 });
+
+logoutButton?.addEventListener("click", () => {
+    localStorage.removeItem("currentUser");
+    window.location.reload();
+});
+
+function authenticateUser(username, password) {
+    const user = users.find(user => user.username === username && user.password === password);
+    if (user) {
+        localStorage.setItem("currentUser", username);
+        showLogoutButton();
+        alert("Login successful!");
+    } else {
+        alert("Invalid credentials");
+    }
+}
+
+function showLoginButton() {
+    loginButton.style.display = "inline-block";
+    logoutButton.style.display = "none";
+}
+
+function showLogoutButton() {
+    loginButton.style.display = "none";
+    logoutButton.style.display = "inline-block";
+}
+
+// Event listener for form submission
+searchForm?.addEventListener("submit", function(event) {
+    event.preventDefault();
+    fetchMovies(searchInput.value).then(movies => {
+        movieList.innerHTML = '';
+        movies.forEach(movie => {
+            const li = document.createElement('li');
+            li.textContent = movie.Title;
+            li.addEventListener('click', () => {
+                localStorage.setItem('selectedMovieId', movie.imdbID);
+                window.location.href = 'details.html';
+            });
+            movieList.appendChild(li);
+        });
+    });
+});
+
+// Function to fetch movies from OMDb API
+async function fetchMovies(query) {
+    const response = await fetch(`http://localhost:3000/movies?title=${query}`);
+    const data = await response.json();
+    if (data.Response === "True") {
+        return data.Search;
+    } else {
+        console.error(data.Error);
+        return [];
+    }
+}
+
+
+// Fetch movie details and display
+if (window.location.pathname.endsWith('details.html')) {
+    const movieId = localStorage.getItem('selectedMovieId');
+    fetchMovieDetails(movieId).then(movie => {
+        displayMovieDetails(movie);
+    });
+}
+
+async function fetchMovieDetails(movieId) {
+    const response = await fetch(`${baseApiUrl}&i=${movieId}`);
+    return await response.json();
+}
+
+function displayMovieDetails(movie) {
+    movieDetails.innerHTML = `
+        <h2>${movie.Title}</h2>
+        <p>${movie.Plot}</p>
+        <p><strong>Director:</strong> ${movie.Director}</p>
+        <p><strong>Actors:</strong> ${movie.Actors}</p>
+    `;
+}
+
+saveFavoriteButton?.addEventListener('click', () => {
+    const movieId = localStorage.getItem('selectedMovieId');
+    saveToFavorites(movieId);
+});
+
+function saveToFavorites(movieId) {
+    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    if (!favorites.includes(movieId)) {
+        favorites.push(movieId);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        alert('Movie saved to favorites!')
+    }}
