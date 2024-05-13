@@ -49,3 +49,62 @@ async function deleteFavoriteMovie(id) {
     },
   });
 }
+
+// Event listeners and DOM manipulation
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("search");
+  const movieList = document.getElementById("movie-list");
+  const movieDetails = document.getElementById("movie-details");
+  const saveFavoriteButton = document.getElementById("save-favorite");
+  const favoritesList = document.getElementById("favorites-list");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", async () => {
+      const query = searchInput.value;
+      const movies = await fetchMovies(query);
+      movieList.innerHTML = "";
+      movies.forEach((movie) => {
+        const li = document.createElement("li");
+        li.textContent = movie.Title;
+        li.addEventListener("click", () => {
+          localStorage.setItem("selectedMovieId", movie.imdbID);
+          window.location.href = "details.html";
+        });
+        movieList.appendChild(li);
+      });
+    });
+  }
+
+  if (movieDetails) {
+    const movieId = localStorage.getItem("selectedMovieId");
+    fetchMovieDetails(movieId).then((movie) => {
+      movieDetails.innerHTML = `
+                <h2>${movie.Title}</h2>
+                <p>${movie.Plot}</p>
+                <img src="${movie.Poster}" alt="${movie.Title}">
+            `;
+      saveFavoriteButton.addEventListener("click", () => {
+        saveFavoriteMovie(movie);
+        alert("Movie saved to favorites");
+      });
+    });
+  }
+
+  if (favoritesList) {
+    getFavoriteMovies().then((movies) => {
+      favoritesList.innerHTML = "";
+      movies.forEach((movie) => {
+        const li = document.createElement("li");
+        li.textContent = movie.Title;
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => {
+          deleteFavoriteMovie(movie._id);
+          li.remove();
+        });
+        li.appendChild(deleteButton);
+        favoritesList.appendChild(li);
+      });
+    });
+  }
+});
