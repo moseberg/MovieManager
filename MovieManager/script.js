@@ -8,9 +8,9 @@ const searchInput = document.querySelector("#search");
 const movieList = document.querySelector("#movie-list");
 const popularMovieList = document.querySelector("#popular-movie-list");
 const searchHistoryList = document.querySelector("#search-history-list");
-const saveFavoriteButton = document.querySelector("#save-favorite");
 const loginButton = document.querySelector("#loginButton");
 const logoutButton = document.querySelector("#logoutButton");
+const favoritesButton = document.querySelector("#favoritesButton");
 const tabButtons = document.querySelectorAll(".tab-button");
 const tabContents = document.querySelectorAll(".tab-content");
 const searchResults = document.querySelector("#search-results");
@@ -28,15 +28,51 @@ const users = [
 
 // Mock login/logout
 loginButton.addEventListener("click", () => {
-  const username = prompt("Enter username:");
-  const password = prompt("Enter password:");
-  authenticateUser(username, password);
+  showLoginModal();
 });
 
 logoutButton.addEventListener("click", () => {
   localStorage.removeItem("currentUser");
-  window.location.reload();
+  window.location.href = "index.html";
 });
+
+favoritesButton.addEventListener("click", () => {
+  window.location.href = "favorites.html";
+});
+
+function showLoginModal() {
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Login</h2>
+      <form id="login-form">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeButton = modal.querySelector(".close-button");
+  const loginForm = modal.querySelector("#login-form");
+
+  closeButton.addEventListener("click", () => {
+    modal.remove();
+  });
+
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = loginForm.querySelector("#username").value;
+    const password = loginForm.querySelector("#password").value;
+    authenticateUser(username, password);
+    modal.remove();
+  });
+}
 
 function authenticateUser(username, password) {
   const user = users.find(
@@ -55,15 +91,18 @@ function authenticateUser(username, password) {
 function showLoginButton() {
   loginButton.style.display = "inline-block";
   logoutButton.style.display = "none";
+  favoritesButton.style.display = "none";
 }
 
 function showLogoutButton() {
   loginButton.style.display = "none";
   logoutButton.style.display = "inline-block";
+  favoritesButton.style.display = "inline-block";
 }
 
 if (localStorage.getItem("currentUser")) {
   showLogoutButton();
+  loadSearchHistory();
 } else {
   showLoginButton();
 }
@@ -75,6 +114,9 @@ tabButtons.forEach((button) => {
     tabContents.forEach((content) => {
       content.style.display = content.id === tab ? "block" : "none";
     });
+    if (tab === "search-history") {
+      loadSearchHistory();
+    }
   });
 });
 
@@ -126,6 +168,70 @@ function displayMovies(movies) {
   });
 }
 
+// Function to save search history
+async function saveSearchHistory(query) {
+  const movie = await fetchMovieDetailsByTitle(query);
+  const currentUser = localStorage.getItem("currentUser");
+  if (!currentUser) return;
+
+  const response = await fetch(`${crudApiUrl}/search-history-${currentUser}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      imdbID: movie.imdbID,
+      title: movie.Title,
+      year: movie.Year,
+      poster: movie.Poster,
+    }),
+  });
+
+  if (response.ok) {
+    loadSearchHistory();
+  } else {
+    console.error("Failed to save search history");
+  }
+}
+
+// Function to load search history
+async function loadSearchHistory() {
+  const currentUser = localStorage.getItem("currentUser");
+  if (!currentUser) return;
+
+  const response = await fetch(`${crudApiUrl}/search-history-${currentUser}`);
+  const data = await response.json();
+  displaySearchHistory(data);
+}
+
+// Function to display search history
+function displaySearchHistory(history) {
+  searchHistoryList.innerHTML = "";
+  const uniqueHistory = Array.from(
+    new Set(history.map((item) => item.imdbID))
+  ).map((id) => history.find((item) => item.imdbID === id));
+  uniqueHistory.forEach((movie) => {
+    const li = document.createElement("li");
+    li.classList.add("movie-item");
+    li.innerHTML = `
+            <img src="${movie.poster}" alt="${movie.title}">
+            <span>${movie.title} (${movie.year})</span>
+        `;
+    li.addEventListener("click", () => {
+      selectedMovieId = movie.imdbID;
+      localStorage.setItem("selectedMovieId", movie.imdbID);
+      window.location.href = "details.html";
+    });
+    searchHistoryList.appendChild(li);
+  });
+}
+
+// Function to fetch movie details by title
+async function fetchMovieDetailsByTitle(title) {
+  const response = await fetch(`${baseApiUrl}&t=${title}`);
+  return await response.json();
+}
+
 // Function to update popular movies
 async function updatePopularMovies(query) {
   const response = await fetch(`${crudApiUrl}/popular-movies`, {
@@ -172,65 +278,8 @@ function displayPopularMovies(movies) {
   });
 }
 
-// Function to save search history
-async function saveSearchHistory(query) {
-  const movie = await fetchMovieDetailsByTitle(query);
-  const response = await fetch(`${crudApiUrl}/search-history`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      imdbID: movie.imdbID,
-      title: movie.Title,
-      year: movie.Year,
-      poster: movie.Poster,
-    }),
-  });
-
-  if (response.ok) {
-    loadSearchHistory();
-  } else {
-    console.error("Failed to save search history");
-  }
-}
-
-// Function to load search history
-async function loadSearchHistory() {
-  const response = await fetch(`${crudApiUrl}/search-history`);
-  const data = await response.json();
-  displaySearchHistory(data);
-}
-
-// Function to display search history
-function displaySearchHistory(history) {
-  searchHistoryList.innerHTML = "";
-  const uniqueHistory = Array.from(
-    new Set(history.map((item) => item.imdbID))
-  ).map((id) => history.find((item) => item.imdbID === id));
-  uniqueHistory.forEach((movie) => {
-    const li = document.createElement("li");
-    li.classList.add("movie-item");
-    li.innerHTML = `
-            <img src="${movie.poster}" alt="${movie.title}">
-            <span>${movie.title} (${movie.year})</span>
-        `;
-    li.addEventListener("click", () => {
-      selectedMovieId = movie.imdbID;
-      localStorage.setItem("selectedMovieId", movie.imdbID);
-      window.location.href = "details.html";
-    });
-    searchHistoryList.appendChild(li);
-  });
-}
-
-// Function to fetch movie details by title
-async function fetchMovieDetailsByTitle(title) {
-  const response = await fetch(`${baseApiUrl}&t=${title}`);
-  return await response.json();
-}
-
 // Save movie to favorites in CRUD CRUD API
+const saveFavoriteButton = document.querySelector("#save-favorite");
 saveFavoriteButton?.addEventListener("click", () => {
   const movieId = localStorage.getItem("selectedMovieId");
   if (movieId) {
@@ -239,12 +288,15 @@ saveFavoriteButton?.addEventListener("click", () => {
 });
 
 async function saveToFavorites(movieId) {
-  const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  const currentUser = localStorage.getItem("currentUser");
+  if (!currentUser) return;
+
+  const favorites = JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
   if (!favorites.includes(movieId)) {
     favorites.push(movieId);
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    localStorage.setItem(`favorites-${currentUser}`, JSON.stringify(favorites));
 
-    const response = await fetch(`${crudApiUrl}/favorites`, {
+    const response = await fetch(`${crudApiUrl}/favorites-${currentUser}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
