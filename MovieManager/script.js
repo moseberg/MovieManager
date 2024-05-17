@@ -9,6 +9,7 @@ const movieList = document.querySelector("#movie-list");
 const popularMovieList = document.querySelector("#popular-movie-list");
 const searchHistoryList = document.querySelector("#search-history-list");
 const loginButton = document.querySelector("#loginButton");
+const registerButton = document.querySelector("#registerButton");
 const logoutButton = document.querySelector("#logoutButton");
 const favoritesButton = document.querySelector("#favoritesButton");
 const tabButtons = document.querySelectorAll(".tab-button");
@@ -17,18 +18,40 @@ const searchResults = document.querySelector("#search-results");
 const tabs = document.querySelector("#tabs");
 const popularMoviesSection = document.querySelector("#popular-movies");
 const searchHistorySection = document.querySelector("#search-history");
+const backToMainButton = document.querySelector("#back-to-main");
 let selectedMovieId = null;
 
-// Mock user database
-const users = [
-  { username: "user1", password: "password1" },
-  { username: "user2", password: "password2" },
-  { username: "user3", password: "password3" },
+// Predefined list of popular movie titles
+const popularMovies = [
+  "The Godfather",
+  "Shrek",
+  "Lilo & Stitch",
+  "The Dark Knight",
+  "Inception",
+  "Fight Club",
+  "Pulp Fiction",
+  "The Matrix",
+  "Forrest Gump",
+  "The Lord of the Rings: The Return of the King",
+  "The Shawshank Redemption",
+  "Interstellar",
+  "Gladiator",
+  "Saving Private Ryan",
+  "Titanic",
+  "Jurassic Park",
+  "The Lion King",
+  "Back to the Future",
+  "Star Wars",
+  "Avengers: Endgame",
 ];
 
 // Mock login/logout
 loginButton.addEventListener("click", () => {
   showLoginModal();
+});
+
+registerButton.addEventListener("click", () => {
+  showRegisterModal();
 });
 
 logoutButton.addEventListener("click", () => {
@@ -74,15 +97,66 @@ function showLoginModal() {
   });
 }
 
-function authenticateUser(username, password) {
-  const user = users.find(
-    (user) => user.username === username && user.password === password
-  );
+function showRegisterModal() {
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Register</h2>
+      <form id="register-form">
+        <input type="text" id="new-username" placeholder="Username" required />
+        <input type="password" id="new-password" placeholder="Password" required />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeButton = modal.querySelector(".close-button");
+  const registerForm = modal.querySelector("#register-form");
+
+  closeButton.addEventListener("click", () => {
+    modal.remove();
+  });
+
+  registerForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = registerForm.querySelector("#new-username").value;
+    const password = registerForm.querySelector("#new-password").value;
+    registerUser(username, password);
+    modal.remove();
+  });
+}
+
+async function registerUser(username, password) {
+  const response = await fetch(`${crudApiUrl}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (response.ok) {
+    alert("Registration successful! Please login.");
+  } else {
+    alert("Registration failed. Please try again.");
+  }
+}
+
+async function authenticateUser(username, password) {
+  const response = await fetch(`${crudApiUrl}/users`);
+  const users = await response.json();
+
+  const user = users.find((user) => user.username === username && user.password === password);
   if (user) {
     localStorage.setItem("currentUser", username);
     showLogoutButton();
     alert("Login successful!");
-    loadSearchHistory();
+    window.location.href = "favorites.html";
   } else {
     alert("Invalid credentials");
   }
@@ -90,12 +164,14 @@ function authenticateUser(username, password) {
 
 function showLoginButton() {
   loginButton.style.display = "inline-block";
+  registerButton.style.display = "inline-block";
   logoutButton.style.display = "none";
   favoritesButton.style.display = "none";
 }
 
 function showLogoutButton() {
   loginButton.style.display = "none";
+  registerButton.style.display = "none";
   logoutButton.style.display = "inline-block";
   favoritesButton.style.display = "inline-block";
 }
@@ -131,7 +207,6 @@ searchForm.addEventListener("submit", function (event) {
         saveSearchHistory(query);
       }
       searchResults.style.display = "block";
-      tabs.style.display = "none";
       popularMoviesSection.style.display = "none";
       searchHistorySection.style.display = "none";
     });
@@ -142,7 +217,11 @@ searchForm.addEventListener("submit", function (event) {
 async function fetchMovies(query) {
   const response = await fetch(`${baseApiUrl}&s=${query}`);
   const data = await response.json();
-  return data.Response === "True" ? data.Search : [];
+  if (data.Response === "True") {
+    return data.Search;
+  } else {
+    return [];
+  }
 }
 
 // Function to display movies
@@ -156,9 +235,9 @@ function displayMovies(movies) {
     const li = document.createElement("li");
     li.classList.add("movie-item");
     li.innerHTML = `
-            <img src="${movie.Poster}" alt="${movie.Title}">
-            <span>${movie.Title} (${movie.Year})</span>
-        `;
+      <img src="${movie.Poster}" alt="${movie.Title}">
+      <span>${movie.Title} (${movie.Year})</span>
+    `;
     li.addEventListener("click", () => {
       selectedMovieId = movie.imdbID;
       localStorage.setItem("selectedMovieId", movie.imdbID);
@@ -166,6 +245,20 @@ function displayMovies(movies) {
     });
     movieList.appendChild(li);
   });
+
+  if (!document.querySelector("#back-to-main")) {
+    const backToMainButton = document.createElement("button");
+    backToMainButton.id = "back-to-main";
+    backToMainButton.classList.add("search-button");
+    backToMainButton.textContent = "Back to Main Page";
+    backToMainButton.addEventListener("click", () => {
+      searchResults.style.display = "none";
+      tabs.style.display = "block";
+      popularMoviesSection.style.display = "block";
+      searchHistorySection.style.display = "none";
+    });
+    searchResults.appendChild(backToMainButton);
+  }
 }
 
 // Function to save search history
@@ -214,9 +307,9 @@ function displaySearchHistory(history) {
     const li = document.createElement("li");
     li.classList.add("movie-item");
     li.innerHTML = `
-            <img src="${movie.poster}" alt="${movie.title}">
-            <span>${movie.title} (${movie.year})</span>
-        `;
+      <img src="${movie.poster}" alt="${movie.title}">
+      <span>${movie.title} (${movie.year})</span>
+    `;
     li.addEventListener("click", () => {
       selectedMovieId = movie.imdbID;
       localStorage.setItem("selectedMovieId", movie.imdbID);
@@ -232,50 +325,34 @@ async function fetchMovieDetailsByTitle(title) {
   return await response.json();
 }
 
-// Function to update popular movies
-async function updatePopularMovies(query) {
-  const response = await fetch(`${crudApiUrl}/popular-movies`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  if (response.ok) {
-    loadPopularMovies();
-  } else {
-    console.error("Failed to update popular movies");
-  }
+// Function to fetch movie details by IMDb ID
+async function fetchMovieDetailsById(imdbID) {
+  const response = await fetch(`${baseApiUrl}&i=${imdbID}`);
+  return await response.json();
 }
 
 // Function to load popular movies
 async function loadPopularMovies() {
-  const response = await fetch(`${crudApiUrl}/popular-movies`);
-  const data = await response.json();
-  displayPopularMovies(data);
+  for (const title of popularMovies) {
+    const details = await fetchMovieDetailsByTitle(title);
+    displayPopularMovie(details);
+  }
 }
 
 // Function to display popular movies
-function displayPopularMovies(movies) {
-  popularMovieList.innerHTML = "";
-  const uniqueMovies = Array.from(new Set(movies.map((movie) => movie.query)));
-  uniqueMovies.forEach((movie) => {
-    fetchMovieDetailsByTitle(movie).then((details) => {
-      const li = document.createElement("li");
-      li.classList.add("movie-item");
-      li.innerHTML = `
-                <img src="${details.Poster}" alt="${details.Title}">
-                <span>${details.Title} (${details.Year})</span>
-            `;
-      li.addEventListener("click", () => {
-        selectedMovieId = details.imdbID;
-        localStorage.setItem("selectedMovieId", details.imdbID);
-        window.location.href = "details.html";
-      });
-      popularMovieList.appendChild(li);
-    });
+function displayPopularMovie(movie) {
+  const li = document.createElement("li");
+  li.classList.add("movie-item");
+  li.innerHTML = `
+    <img src="${movie.Poster}" alt="${movie.Title}">
+    <span>${movie.Title} (${movie.Year})</span>
+  `;
+  li.addEventListener("click", () => {
+    selectedMovieId = movie.imdbID;
+    localStorage.setItem("selectedMovieId", movie.imdbID);
+    window.location.href = "details.html";
   });
+  popularMovieList.appendChild(li);
 }
 
 // Save movie to favorites in CRUD CRUD API
@@ -291,7 +368,8 @@ async function saveToFavorites(movieId) {
   const currentUser = localStorage.getItem("currentUser");
   if (!currentUser) return;
 
-  const favorites = JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
+  const favorites =
+    JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
   if (!favorites.includes(movieId)) {
     favorites.push(movieId);
     localStorage.setItem(`favorites-${currentUser}`, JSON.stringify(favorites));
@@ -306,6 +384,7 @@ async function saveToFavorites(movieId) {
 
     if (response.ok) {
       alert("Movie saved to favorites!");
+      window.location.href = "favorites.html";
     } else {
       console.error("Failed to save favorite movie");
     }
@@ -315,12 +394,12 @@ async function saveToFavorites(movieId) {
 // Fetch movie details and display on details.html
 if (window.location.pathname.endsWith("details.html")) {
   const movieId = localStorage.getItem("selectedMovieId");
-  fetchMovieDetails(movieId).then((movie) => {
+  fetchMovieDetailsById(movieId).then((movie) => {
     displayMovieDetails(movie);
   });
 }
 
-async function fetchMovieDetails(movieId) {
+async function fetchMovieDetailsById(movieId) {
   const response = await fetch(`${baseApiUrl}&i=${movieId}`);
   return await response.json();
 }
@@ -329,15 +408,15 @@ function displayMovieDetails(movie) {
   const movieDetails = document.querySelector("#movie-details");
   if (movieDetails) {
     movieDetails.innerHTML = `
-            <h2>${movie.Title}</h2>
-            <img src="${movie.Poster}" alt="${movie.Title}">
-            <p>${movie.Plot}</p>
-            <p><strong>Director:</strong> ${movie.Director}</p>
-            <p><strong>Actors:</strong> ${movie.Actors}</p>
-            <p><strong>Year:</strong> ${movie.Year}</p>
-            <p><strong>Genre:</strong> ${movie.Genre}</p>
-            <p><strong>Rating:</strong> ${movie.imdbRating}</p>
-        `;
+      <h2>${movie.Title}</h2>
+      <img src="${movie.Poster}" alt="${movie.Title}">
+      <p>${movie.Plot}</p>
+      <p><strong>Director:</strong> ${movie.Director}</p>
+      <p><strong>Actors:</strong> ${movie.Actors}</p>
+      <p><strong>Year:</strong> ${movie.Year}</p>
+      <p><strong>Genre:</strong> ${movie.Genre}</p>
+      <p><strong>Rating:</strong> ${movie.imdbRating}</p>
+    `;
   }
 }
 

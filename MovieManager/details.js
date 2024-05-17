@@ -9,9 +9,9 @@ const saveFavoriteButton = document.querySelector("#save-favorite");
 let selectedMovieId = localStorage.getItem("selectedMovieId");
 
 if (selectedMovieId) {
-    fetchMovieDetails(selectedMovieId).then((movie) => {
-        displayMovieDetails(movie);
-    });
+  fetchMovieDetails(selectedMovieId).then((movie) => {
+    displayMovieDetails(movie);
+  });
 }
 
 async function fetchMovieDetails(movieId) {
@@ -46,7 +46,8 @@ async function saveToFavorites(movieId) {
   const currentUser = localStorage.getItem("currentUser");
   if (!currentUser) return;
 
-  const favorites = JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
+  const favorites =
+    JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
   if (!favorites.includes(movieId)) {
     favorites.push(movieId);
     localStorage.setItem(`favorites-${currentUser}`, JSON.stringify(favorites));
@@ -62,6 +63,7 @@ async function saveToFavorites(movieId) {
 
     if (response.ok) {
       alert("Movie saved to favorites!");
+      window.location.href = "favorites.html";
     } else {
       console.error("Failed to save favorite movie");
     }

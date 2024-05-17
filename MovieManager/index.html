@@ -1,75 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Movie Manager</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
-  <style>
-    .movie-item img {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .movie-item span {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <nav>
-      <a href="index.html"><h1>Movie Manager</h1></a>
-      <div class="auth-buttons">
-        <button id="loginButton">Login</button>
-        <button id="logoutButton" style="display: none">Logout</button>
-        <button id="favoritesButton" style="display: none">Favorites</button>
-      </div>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Manager</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="index.html"><h1>Movie Manager</h1></a>
+        <div class="nav-buttons">
+          <button class="tab-button" data-tab="popular-movies">Popular Movies</button>
+          <button class="tab-button" data-tab="search-history">Search History</button>
+        </div>
+        <div class="auth-buttons">
+          <button id="loginButton">Login</button>
+          <button id="registerButton">Register</button>
+          <button id="logoutButton" style="display: none">Logout</button>
+          <button id="favoritesButton" style="display: none">Favorites</button>
+        </div>
+      </nav>
+    </header>
 
-  <div class="container">
-    <div class="search-container">
-      <form id="search-form">
-        <input
-          type="text"
-          id="search"
-          class="search-input"
-          placeholder="Search for movies..."
-        />
-        <button type="submit" class="search-button">Search</button>
-      </form>
-    </div>
-    <div id="tabs">
-      <button class="tab-button" data-tab="popular-movies">
-        Popular Movies
-      </button>
-      <button class="tab-button" data-tab="search-history">
-        Search History
-      </button>
-    </div>
-    <div id="tab-contents">
-      <div id="popular-movies" class="tab-content">
-        <h2>Popular Movies</h2>
-        <ul id="popular-movie-list"></ul>
+    <div class="container">
+      <div class="search-container">
+        <form id="search-form">
+          <input type="text" id="search" class="search-input" placeholder="Search for movies..." />
+          <button type="submit" class="search-button">Search</button>
+        </form>
       </div>
-      <div id="search-history" class="tab-content" style="display: none">
-        <h2>Your Search History</h2>
-        <ul id="search-history-list"></ul>
+      <div id="tab-contents">
+        <div id="popular-movies" class="tab-content">
+          <h2>Popular Movies</h2>
+          <div class="movie-list-wrapper">
+            <ul id="popular-movie-list" class="movie-list"></ul>
+          </div>
+        </div>
+        <div id="search-history" class="tab-content" style="display: none">
+          <h2>Your Search History</h2>
+          <div class="movie-list-wrapper">
+            <ul id="search-history-list" class="movie-list"></ul>
+          </div>
+        </div>
+      </div>
+      <div id="search-results" style="display: none">
+        <h2>Search Results</h2>
+        <button id="back-to-main" class="search-button">Back to Main Page</button>
+        <div class="movie-list-wrapper">
+          <ul id="movie-list" class="movie-list"></ul>
+        </div>
       </div>
     </div>
-    <div id="search-results" style="display: none">
-      <h2>Search Results</h2>
-      <ul id="movie-list"></ul>
-    </div>
-  </div>
 
-  <footer>
-    <p>&copy; 2024 Movie Manager. All rights reserved.</p>
-  </footer>
-  <script src="script.js"></script>
-</body>
+    <footer>
+      <p>&copy; 2024 Movie Manager. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+  </body>
 </html>

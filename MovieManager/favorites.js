@@ -18,7 +18,9 @@ async function loadFavorites() {
 
 function displayFavorites(favorites) {
   favoritesList.innerHTML = "";
-  const uniqueFavorites = Array.from(new Set(favorites.map((item) => item.movieId)));
+  const uniqueFavorites = Array.from(
+    new Set(favorites.map((item) => item.movieId))
+  );
   uniqueFavorites.forEach((movieId) => {
     fetchMovieDetails(movieId).then((details) => {
       const li = document.createElement("li");
@@ -32,12 +34,11 @@ function displayFavorites(favorites) {
     });
   });
 
-  const removeButtons = document.querySelectorAll(".remove-favorite");
-  removeButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
+  favoritesList.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-favorite")) {
       const movieId = e.target.getAttribute("data-id");
       removeFavorite(movieId);
-    });
+    }
   });
 }
 
@@ -47,9 +48,13 @@ async function fetchMovieDetails(movieId) {
 }
 
 async function removeFavorite(movieId) {
-  const favorites = JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
+  const favorites =
+    JSON.parse(localStorage.getItem(`favorites-${currentUser}`)) || [];
   const updatedFavorites = favorites.filter((id) => id !== movieId);
-  localStorage.setItem(`favorites-${currentUser}`, JSON.stringify(updatedFavorites));
+  localStorage.setItem(
+    `favorites-${currentUser}`,
+    JSON.stringify(updatedFavorites)
+  );
 
   // Fetch favorite items from crudcrud API to get the ID to delete
   const response = await fetch(`${crudApiUrl}/favorites-${currentUser}`);

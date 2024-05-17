@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Favorite Movies</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
-</head>
-<body>
-  <header>
-    <nav>
-      <a href="index.html"><h1>Favorite Movies</h1></a>
-      <div class="auth-buttons">
-        <button id="logoutButton">Logout</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Favorite Movies</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="index.html"><h1>Favorite Movies</h1></a>
+        <div class="auth-buttons">
+          <button id="logoutButton">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div class="movie-list-wrapper">
+        <ul id="favorites-list" class="movie-list"></ul>
       </div>
-    </nav>
-  </header>
+    </div>
 
-  <div class="container">
-    <ul id="favorites-list"></ul>
-  </div>
-
-  <footer>
-    <p>&copy; 2024 Movie Manager. All rights reserved.</p>
-  </footer>
-  <script src="favorites.js"></script>
-</body>
+    <footer>
+      <p>&copy; 2024 Movie Manager. All rights reserved.</p>
+    </footer>
+    <script src="favorites.js"></script>
+  </body>
 </html>
