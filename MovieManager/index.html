@@ -1,70 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Movie Manager</title>
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
     <style>
-        .movie-item img {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .movie-item span {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-        }
+      .movie-item img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .movie-item span {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <nav>
-            <h1>Movie Manager</h1>
-            <div class="auth-buttons">
-                <button id="loginButton">Login</button>
-                <button id="logoutButton" style="display: none">Logout</button>
-            </div>
-        </nav>
+      <nav>
+        <h1>Movie Manager</h1>
+        <div class="auth-buttons">
+          <button id="loginButton">Login</button>
+          <button id="logoutButton" style="display: none">Logout</button>
+        </div>
+      </nav>
     </header>
 
     <div class="container">
-        <div class="search-container">
-            <form id="search-form">
-                <input
-                    type="text"
-                    id="search"
-                    class="search-input"
-                    placeholder="Search for movies..."
-                />
-                <button type="submit" class="search-button">Search</button>
-            </form>
+      <div class="search-container">
+        <form id="search-form">
+          <input
+            type="text"
+            id="search"
+            class="search-input"
+            placeholder="Search for movies..."
+          />
+          <button type="submit" class="search-button">Search</button>
+        </form>
+      </div>
+      <div id="tabs">
+        <button class="tab-button" data-tab="popular-movies">
+          Popular Movies
+        </button>
+        <button class="tab-button" data-tab="search-history">
+          Search History
+        </button>
+      </div>
+      <div id="tab-contents">
+        <div id="popular-movies" class="tab-content">
+          <h2>Popular Movies</h2>
+          <ul id="popular-movie-list"></ul>
         </div>
-        <div id="tabs">
-            <button class="tab-button" data-tab="popular-movies">Popular Movies</button>
-            <button class="tab-button" data-tab="search-history">Search History</button>
+        <div id="search-history" class="tab-content" style="display: none">
+          <h2>Your Search History</h2>
+          <ul id="search-history-list"></ul>
         </div>
-        <div id="tab-contents">
-            <div id="popular-movies" class="tab-content">
-                <h2>Popular Movies</h2>
-                <ul id="popular-movie-list"></ul>
-            </div>
-            <div id="search-history" class="tab-content" style="display: none;">
-                <h2>Your Search History</h2>
-                <ul id="search-history-list"></ul>
-            </div>
-        </div>
-        <div id="search-results" style="display: none;">
-            <h2>Search Results</h2>
-            <ul id="movie-list"></ul>
-        </div>
+      </div>
+      <div id="search-results" style="display: none">
+        <h2>Search Results</h2>
+        <ul id="movie-list"></ul>
+      </div>
     </div>
 
     <footer>
-        <p>&copy; 2024 Movie Manager. All rights reserved.</p>
+      <p>&copy; 2024 Movie Manager. All rights reserved.</p>
     </footer>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

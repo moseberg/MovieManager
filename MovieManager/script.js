@@ -1,22 +1,24 @@
-import fetch from 'node-fetch';
-
 const apiKey = "5769c893"; // OMDb API Key
 const baseApiUrl = `http://www.omdbapi.com/?apikey=${apiKey}`;
-const crudApiUrl = "https://crudapi.co.uk/api/v1/";
-const crudApiKey = "ayTep4yOMiyKX4U8qcDml9Doi6uqeI80-vDoR6WhZRcbpAVpyQ";
+const crudApiUrl = "https://crudcrud.com/api/27d8e498a0f144a0a7f9a79d01952ce1";
 
 // Elements
-const searchForm = document.querySelector("#search-form");  
+const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search");
 const movieList = document.querySelector("#movie-list");
-const favoritesList = document.querySelector("#favorites-list");
-const movieDetails = document.querySelector("#movie-details");
+const popularMovieList = document.querySelector("#popular-movie-list");
+const searchHistoryList = document.querySelector("#search-history-list");
 const saveFavoriteButton = document.querySelector("#save-favorite");
-
 const loginButton = document.querySelector("#loginButton");
 const logoutButton = document.querySelector("#logoutButton");
-
-let currentPage = 1;
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabContents = document.querySelectorAll('.tab-content');
+const searchResults = document.querySelector("#search-results");
+const tabs = document.querySelector("#tabs");
+const popularMoviesSection = document.querySelector("#popular-movies");
+const searchHistorySection = document.querySelector("#search-history");
+let selectedMovieId = null;
+let isLoggedIn = false;
 
 // Mock user database
 const users = [
