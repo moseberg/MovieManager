@@ -11,8 +11,8 @@ const searchHistoryList = document.querySelector("#search-history-list");
 const saveFavoriteButton = document.querySelector("#save-favorite");
 const loginButton = document.querySelector("#loginButton");
 const logoutButton = document.querySelector("#logoutButton");
-const tabButtons = document.querySelectorAll('.tab-button');
-const tabContents = document.querySelectorAll('.tab-content');
+const tabButtons = document.querySelectorAll(".tab-button");
+const tabContents = document.querySelectorAll(".tab-content");
 const searchResults = document.querySelector("#search-results");
 const tabs = document.querySelector("#tabs");
 const popularMoviesSection = document.querySelector("#popular-movies");
@@ -22,95 +22,122 @@ let isLoggedIn = false;
 
 // Mock user database
 const users = [
-    { username: "user1", password: "password1" },
-    { username: "user2", password: "password2" }
+  { username: "user1", password: "password1" },
+  { username: "user2", password: "password2" },
+  { username: "user3", password: "password3" },
 ];
+
+// Mock login/logout
+loginButton.addEventListener("click", () => {
+  isLoggedIn = true;
+  loginButton.style.display = "none";
+  logoutButton.style.display = "block";
+  loadSearchHistory();
+});
+
+logoutButton.addEventListener("click", () => {
+  isLoggedIn = false;
+  loginButton.style.display = "block";
+  logoutButton.style.display = "none";
+  searchHistorySection.style.display = "none";
+});
+
+// Tab functionality
+tabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const tab = button.getAttribute("data-tab");
+    tabContents.forEach((content) => {
+      content.style.display = content.id === tab ? "block" : "none";
+    });
+  });
+});
 
 // Authentication
 const currentUser = localStorage.getItem("currentUser");
 if (currentUser) {
-    showLogoutButton();
+  showLogoutButton();
 } else {
-    showLoginButton();
+  showLoginButton();
 }
 
 loginButton?.addEventListener("click", () => {
-    const username = prompt("Enter username:");
-    const password = prompt("Enter password:");
-    authenticateUser(username, password);
+  const username = prompt("Enter username:");
+  const password = prompt("Enter password:");
+  authenticateUser(username, password);
 });
 
 logoutButton?.addEventListener("click", () => {
-    localStorage.removeItem("currentUser");
-    window.location.reload();
+  localStorage.removeItem("currentUser");
+  window.location.reload();
 });
 
 function authenticateUser(username, password) {
-    const user = users.find(user => user.username === username && user.password === password);
-    if (user) {
-        localStorage.setItem("currentUser", username);
-        showLogoutButton();
-        alert("Login successful!");
-    } else {
-        alert("Invalid credentials");
-    }
+  const user = users.find(
+    (user) => user.username === username && user.password === password
+  );
+  if (user) {
+    localStorage.setItem("currentUser", username);
+    showLogoutButton();
+    alert("Login successful!");
+  } else {
+    alert("Invalid credentials");
+  }
 }
 
 function showLoginButton() {
-    loginButton.style.display = "inline-block";
-    logoutButton.style.display = "none";
+  loginButton.style.display = "inline-block";
+  logoutButton.style.display = "none";
 }
 
 function showLogoutButton() {
-    loginButton.style.display = "none";
-    logoutButton.style.display = "inline-block";
+  loginButton.style.display = "none";
+  logoutButton.style.display = "inline-block";
 }
 
 // Event listener for form submission
-searchForm?.addEventListener("submit", function(event) {
-    event.preventDefault();
-    fetchMovies(searchInput.value).then(movies => {
-        movieList.innerHTML = '';
-        movies.forEach(movie => {
-            const li = document.createElement('li');
-            li.textContent = movie.Title;
-            li.addEventListener('click', () => {
-                localStorage.setItem('selectedMovieId', movie.imdbID);
-                window.location.href = 'details.html';
-            });
-            movieList.appendChild(li);
-        });
+searchForm?.addEventListener("submit", function (event) {
+  event.preventDefault();
+  fetchMovies(searchInput.value).then((movies) => {
+    movieList.innerHTML = "";
+    movies.forEach((movie) => {
+      const li = document.createElement("li");
+      li.textContent = movie.Title;
+      li.addEventListener("click", () => {
+        localStorage.setItem("selectedMovieId", movie.imdbID);
+        window.location.href = "details.html";
+      });
+      movieList.appendChild(li);
     });
+  });
 });
 
 // Function to fetch movies from OMDb API
 async function fetchMovies(query) {
-    const response = await fetch(`http://localhost:3000/movies?title=${query}`);
-    const data = await response.json();
-    if (data.Response === "True") {
-        return data.Search;
-    } else {
-        console.error(data.Error);
-        return [];
-    }
+  const response = await fetch(`http://localhost:3000/movies?title=${query}`);
+  const data = await response.json();
+  if (data.Response === "True") {
+    return data.Search;
+  } else {
+    console.error(data.Error);
+    return [];
+  }
 }
 
-
 // Fetch movie details and display
-if (window.location.pathname.endsWith('details.html')) {
-    const movieId = localStorage.getItem('selectedMovieId');
-    fetchMovieDetails(movieId).then(movie => {
-        displayMovieDetails(movie);
-    });
+if (window.location.pathname.endsWith("details.html")) {
+  const movieId = localStorage.getItem("selectedMovieId");
+  fetchMovieDetails(movieId).then((movie) => {
+    displayMovieDetails(movie);
+  });
 }
 
 async function fetchMovieDetails(movieId) {
-    const response = await fetch(`${baseApiUrl}&i=${movieId}`);
-    return await response.json();
+  const response = await fetch(`${baseApiUrl}&i=${movieId}`);
+  return await response.json();
 }
 
 function displayMovieDetails(movie) {
-    movieDetails.innerHTML = `
+  movieDetails.innerHTML = `
         <h2>${movie.Title}</h2>
         <p>${movie.Plot}</p>
         <p><strong>Director:</strong> ${movie.Director}</p>
@@ -118,15 +145,16 @@ function displayMovieDetails(movie) {
     `;
 }
 
-saveFavoriteButton?.addEventListener('click', () => {
-    const movieId = localStorage.getItem('selectedMovieId');
-    saveToFavorites(movieId);
+saveFavoriteButton?.addEventListener("click", () => {
+  const movieId = localStorage.getItem("selectedMovieId");
+  saveToFavorites(movieId);
 });
 
 function saveToFavorites(movieId) {
-    const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    if (!favorites.includes(movieId)) {
-        favorites.push(movieId);
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        alert('Movie saved to favorites!')
-    }}
+  const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  if (!favorites.includes(movieId)) {
+    favorites.push(movieId);
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    alert("Movie saved to favorites!");
+  }
+}
